@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: guestbook
+spec:
+  generators:
+  - git:
+      repoURL: https://github.com/a1tan/applicationsetsample.git
+      revision: HEAD
+      files:
+      - path: "cluster-config/**/dev/config.json"
+  template:
+    metadata:
+      name: '{{cluster.name}}-guestbook'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/a1tan/applicationsetsample.git
+        targetRevision: HEAD
+        path: "apps/guestbook"
+      destination:
+        #server: https://kubernetes.default.svc
+        server: '{{cluster.address}}'
+        namespace: guestbook
+      syncPolicy:
+       syncOptions:
+       - CreateNamespace=true
+       automated:
+         selfHeal: true
+         prune: true
